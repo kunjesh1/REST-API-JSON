@@ -2,11 +2,13 @@ const express = require('express');
 const fs = require('fs');
 const util = require('util');
 const router = express.Router();
-const readFile = util.promisify(fs.readFile);
+const readFile = util.promisify(fs.readFile); 
 var product;
 var read = readFile('./product.json', 'utf8');
 
 
+
+//Handling Get request for the Products
 router.get('/', (req, res, next) => {
 
     //console.log(typeof(read()));
@@ -23,7 +25,7 @@ router.get('/', (req, res, next) => {
 
 });
 
-
+//Handling GET request for the particular ID
 router.get('/:id', (req, res, next) => {
 
     id = req.params.id;
@@ -40,10 +42,10 @@ router.get('/:id', (req, res, next) => {
 });
 
 
+//Handling POST resquest for the products
 router.post('/', (req, res, next) => {
 
-
-    product_input = {
+   var product_input = {
 
         "id": req.body.id,
         "name": req.body.name,
@@ -51,11 +53,10 @@ router.post('/', (req, res, next) => {
         "price": req.body.price
 
     };
-
-
+    read.then(product => JSON.parse(product)).then(product =>{
 
     product.push(product_input);
-    // console.log(sample_product);
+     console.log(product_input);
 
 
     fs.writeFile('./product.json', JSON.stringify(product), (err) => {
@@ -76,7 +77,9 @@ router.post('/', (req, res, next) => {
 
 });
 
-//PUT method 
+});
+
+//PUT method for the particular ID for the product
 router.put('/:id', (req, res, next) => {
     var id = req.params.id;
 
@@ -125,39 +128,34 @@ router.delete("/:id", (req, res, next) => {
     read.then(product => JSON.parse(product)).then(product => {
        
   var id=req.params.id;  
-        console.log(product,id);
+        //console.log(product,id);
 
-        var sample_product;
+        var updated_product;
 
 
-        sample_product=product.forEach((d,index)=>{
-           
-           if(d.id===id){
-               product.splice(index,1);
-               console.log(product);
-               return product;
-               
-            }
-            else
-             return "Not found"; 
-        
+        updated_product=product.filter(d=>{
+            return d.id!=id;
         });
 
-        console.log(sample_product);
-       //const arr=product.map(d=>d.id);
-       //console.log(arr);
-    //    product=product.filter((d,index)=>{
-    //        if(d.id===id){d.splice(index,1);
-    //        return d;}
-    //        else
-    //        return "not found";
 
-    //    });
+        console.log(updated_product);
 
+        fs.writeFile('./product.json', JSON.stringify(updated_product), (err) => {
+
+
+            if (err) throw err;
+            console.log("Data is deleted successfully");
+
+        });
+
+
+
+
+      
        res.status(200).json({
 
         message:"Handle delete request from the /products",
-        product:sample_product
+        product:updated_product
 
        });
 }).catch(err=>console.log(err));
