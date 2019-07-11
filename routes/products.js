@@ -19,7 +19,7 @@ router.get('/', (req, res, next) => {
             product: product
         });
     }
-    );
+    ).catch(err=>console.log(err));
 
 
 
@@ -28,16 +28,32 @@ router.get('/', (req, res, next) => {
 //Handling GET request for the particular ID
 router.get('/:id', (req, res, next) => {
 
-    id = req.params.id;
-
+    var id = req.params.id;
+    var find;
     read.then(product => JSON.parse(product)).then((product) => {
+        console.log(id);
+        find=product.filter(d=>{if(d.id==id)return d;});
+            console.log(find);
+
+            if(find.length===0)
+            {
+            
+                    res.status(404).json({
+            
+                        message: "Not found particular id"
+                    });
+            }
+
+            else{
         res.status(200).json({
 
             message: 'Handling get requests to /products id',
-            product: product[id]
+            product: find
         });
     }
-    );
+
+}
+    ).catch(err=>console.log(err));
 
 });
 
@@ -55,6 +71,7 @@ router.post('/', (req, res, next) => {
     };
     read.then(product => JSON.parse(product)).then(product =>{
 
+        
     product.push(product_input);
      console.log(product_input);
 
@@ -75,17 +92,19 @@ router.post('/', (req, res, next) => {
 
     });
 
-});
+}).catch(err=>console.log(err));
 
 });
 
 //PUT method for the particular ID for the product
 router.put('/:id', (req, res, next) => {
-    var id = req.params.id;
+      id = req.params.id;
+     var find=null;
+     var product_input;
 
     read.then(product => JSON.parse(product)).then(product => {
 
-        console.log(product);
+       // console.log(product);
         product_input = {
 
             "id": req.body.id,
@@ -95,9 +114,19 @@ router.put('/:id', (req, res, next) => {
 
         };
 
+       
+     find=product.forEach((d,index)=>{
+         
+            if(d.id==id)
+            {
+                product[index]=product_input;
+                return index;
+           }
 
-        product[id] = product_input;
+        });
 
+
+        console.log(find);
 
         fs.writeFile('./product.json', JSON.stringify(product), (err) => {
 
@@ -108,8 +137,6 @@ router.put('/:id', (req, res, next) => {
         });
 
 
-
-
         res.status(200).json({
 
             message: 'Handling PUT request to /products',
@@ -117,7 +144,7 @@ router.put('/:id', (req, res, next) => {
 
         });
 
-    });
+    }).catch(err=>console.log(err));
 
 });
 
