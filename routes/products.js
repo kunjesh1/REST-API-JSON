@@ -7,7 +7,6 @@ var product;
 var read = readFile('./product.json', 'utf8');
 
 
-
 //Handling Get request for the Products
 router.get('/', (req, res, next) => {
 
@@ -34,7 +33,7 @@ router.get('/:id', (req, res, next) => {
         console.log(id);
         find=product.filter(d=>{if(d.id==id)return d;});
             console.log(find);
-
+            console.log(find);
             if(find.length===0)
             {
             
@@ -99,11 +98,13 @@ router.post('/', (req, res, next) => {
 //PUT method for the particular ID for the product
 router.put('/:id', (req, res, next) => {
       id = req.params.id;
-     var find=null;
+     
      var product_input;
+     var find;
 
     read.then(product => JSON.parse(product)).then(product => {
-
+       
+       
        // console.log(product);
         product_input = {
 
@@ -114,19 +115,25 @@ router.put('/:id', (req, res, next) => {
 
         };
 
-       
-     find=product.forEach((d,index)=>{
-         
-            if(d.id==id)
-            {
-                product[index]=product_input;
-                return index;
-           }
-
+      //Find if particular id exists or not
+       find= product.filter((d,index)=>{
+            if(d.id==id) {product[index]=product_input;return d;}
         });
+   
+       //If not exist then throw error 404
+     if(find.length===0)
+        {
+        
+                res.status(404).json({
+        
+                    message: "Not found particular id to PUT request."
+                });
+        }
+        //If exist then update to the JSON file
+        else 
+        {
 
-
-        console.log(find);
+        console.log(find);  
 
         fs.writeFile('./product.json', JSON.stringify(product), (err) => {
 
@@ -139,10 +146,10 @@ router.put('/:id', (req, res, next) => {
 
         res.status(200).json({
 
-            message: 'Handling PUT request to /products',
+            message: 'Handling PUT request to /products for particular id',
 
 
-        });
+        });}
 
     }).catch(err=>console.log(err));
 
@@ -175,10 +182,6 @@ router.delete("/:id", (req, res, next) => {
 
         });
 
-
-
-
-      
        res.status(200).json({
 
         message:"Handle delete request from the /products",
